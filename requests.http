@@ -1,0 +1,65 @@
+
+// USER REQUESTS
+POST http://localhost:1234/account
+Content-Type: application/json
+
+{
+    "firstname": "Myrtille",
+    "lastname": "Letellier",
+    "email": "doud@espana.fr",
+    "password": "yop",
+    "passwordConfirmation": "yop",
+    "country": "france"
+}
+
+###
+PUT http://localhost:1234/account/12
+Content-Type: application/json
+
+{
+    "country": "dindon"
+}
+
+
+###
+DELETE http://localhost:1234/account/13
+Content-Type: application/json
+
+###
+// WALLET REQUESTS
+
+POST http://localhost:1234/wallet
+Content-Type: application/json
+
+{
+    "name": "long term investment"
+}
+
+###
+PATCH http://localhost:1234/wallet/15
+Content-Type: application/json
+
+{
+    "is_default": "tmort"
+}
+
+###
+DELETE http://localhost:1234/wallet/15
+Content-Type: application/json
+
+###
+// EVENT REQUESTS
+
+POST http://localhost:1234/event/new/15
+Content-Type: application/json
+
+{
+    "type": "buy",
+    "date": "2020-11-12 12:56:43.435891+01",
+    "quantity": 2,
+    "total_amount": 32000,
+    "platform_sending": "binance",
+    "platform_receiving": "binance",
+    "currency_asset": "bitcoin",
+    "currency_counterparty": "dollar"
+}
