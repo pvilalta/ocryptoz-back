@@ -46,10 +46,9 @@ export interface editWalletInt {
  * EVENT
  */
 
-export interface SubmitEventInformations {
+export interface newEventInt {
     [key: string]: number | string | boolean | Date | undefined;
 
-    id?: number,
     type: string,
     date: Date,
     quantity: number,

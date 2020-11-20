@@ -54,7 +54,7 @@ POST http://localhost:1234/event/new/15
 Content-Type: application/json
 
 {
-    "type": 1,
+    "type": "BUY",
     "date": "2020-11-12 12:56:43.435891+01",
     "quantity": 2,
     "total_amount": 32000,
