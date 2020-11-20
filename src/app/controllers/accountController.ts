@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { User } from '../models/User'
 import * as bcrypt from 'bcrypt'
-import { UserInformations, UserInformationsEdit } from '../interface/interface'
+import { editUserInt, newUserInt } from '../interface/interface'
 
 
 export class AccountController {
@@ -62,20 +62,16 @@ export class AccountController {
             delete req.body.passwordConfirmation
 
             req.body.password = await bcrypt.hash(req.body.password, 10)
-
-            const userInfo: UserInformations = {
-                firstname: req.body.firstname,
-                lastname: req.body.lastname,
-                email: req.body.email,
-                password: req.body.password,
-                country: req.body.country
+            
+            // type guard treatment
+            if (this.isAccountNew(req.body)) {
+                let userInfo: newUserInt = req.body
+                const result = await this.user.insert(userInfo)
+                return res.json(result)
+            } else {
+                throw new Error('Invalid Account format')
             }
 
-
-            const result = await this.user.insert(userInfo)
-
-
-            return res.json(result)
         } catch (error) {
             return res.json('error: ' + error.message)
 
@@ -89,7 +85,7 @@ export class AccountController {
 
             const id = parseInt(req.params.id, 10)
 
-            const isUserExist: UserInformations = await this.user.findOne(id)        
+            const isUserExist = await this.user.findOne(id)        
     
             if(!!isUserExist) {
     
@@ -118,12 +114,22 @@ export class AccountController {
 
                 }
                 
+                // fitting expected format
                 req.body.id = id;
-                let userInfo: UserInformationsEdit = req.body;
+                if (!req.body.email) {req.body.email = isUserExist.email}
+                if (!req.body.password) {req.body.password = isUserExist.password}
+                if (!req.body.country) {req.body.country = isUserExist.country}
                 
-                const result: UserInformations = await this.user.update(userInfo)
+                // type guard treatment
+                if (this.isAccountEdit(req.body)) {
+                    let userInfo: editUserInt = req.body
+                    const result = await this.user.update(userInfo)
+                    return res.json(result)
+                } else {
+                    throw new Error('Invalid Account format')
+                }
+                
     
-                return res.json(result)
             } else {
                 throw new Error('This user is not existing')
     
@@ -149,6 +155,14 @@ export class AccountController {
         }
 
 
+    }
+
+    private isAccountEdit(elem: any): elem is editUserInt {
+        return typeof elem.id === 'number' && typeof elem.email === 'string' && typeof elem.password === 'string' && typeof elem.country === 'string'
+    }
+
+    private isAccountNew(elem: any): elem is newUserInt {
+        return typeof elem.firstname === 'string' && typeof elem.lastname === 'string' && typeof elem.email === 'string' && typeof elem.password === 'string' && typeof elem.country === 'string'
     }
 
 }

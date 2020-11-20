@@ -1,10 +1,9 @@
 import db from '../config/db'
 import { CoreModel } from './CoreModel'
-import { WalletInformations } from '../interface/interface';
 
 export class Wallet extends CoreModel {
 
-
+    /* constructor (id: number, public name: string, public is_default: boolean, public user_id: number){super(id)}*/
 
 
     public async showWalletByUserId(id: number): Promise<any[] | undefined> {
@@ -28,7 +27,7 @@ export class Wallet extends CoreModel {
         }
     }
 
-    public async getOneWalletByUserId(walletId: number, userId: number): Promise<WalletInformations | undefined> {
+    public async getOneWalletByUserId(walletId: number, userId: number): Promise<any> {
 
         try {
             const result = await db.query(
