@@ -26,6 +26,9 @@ export class EventController  {
             req.body.wallet_id = walletId
 
             const eventInfo: SubmitEventInformations = req.body
+
+            console.log(eventInfo);
+            
     
             const result = await this.event.insert(eventInfo);
     

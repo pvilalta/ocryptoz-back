@@ -3,10 +3,9 @@
  * USER
  */
 
-export interface UserInformations {
+export interface newUserInt {
     [key: string]: number | string | undefined;
 
-    id?: number,
     firstname: string,
     lastname: string,
     email: string,
@@ -14,7 +13,7 @@ export interface UserInformations {
     country: string
 }
 
-export interface UserInformationsEdit {
+export interface editUserInt {
     [key: string]: number | string | undefined;
 
     id?: number,
@@ -27,16 +26,15 @@ export interface UserInformationsEdit {
  * WALLET
  */
 
-export interface WalletInformations {
+export interface newWalletInt {
     [key: string]: number | string | boolean | undefined;
 
-    id?: number,
     name: string,
     is_default: boolean,
     user_id: number
 }
 
-export interface WalletInformationsEdit {
+export interface editWalletInt {
     [key: string]: number | string | boolean | undefined;
 
     id?: number,
@@ -49,7 +47,7 @@ export interface WalletInformationsEdit {
  */
 
 export interface SubmitEventInformations {
-    [key: string]: number | string | boolean | Date |undefined;
+    [key: string]: number | string | boolean | Date | undefined;
 
     id?: number,
     type: string,

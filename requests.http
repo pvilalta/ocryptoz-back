@@ -4,20 +4,20 @@ POST http://localhost:1234/account
 Content-Type: application/json
 
 {
-    "firstname": "Myrtille",
-    "lastname": "Letellier",
-    "email": "doud@espana.fr",
+    "firstname": "Enrico",
+    "lastname": "Massias",
+    "email": "enrico@espana.fr",
     "password": "yop",
     "passwordConfirmation": "yop",
-    "country": "france"
+    "country": "espagne"
 }
 
 ###
-PUT http://localhost:1234/account/12
+PUT http://localhost:1234/account/15
 Content-Type: application/json
 
 {
-    "country": "dindon"
+    "country": "france"
 }
 
 
@@ -36,11 +36,11 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:1234/wallet/15
+PATCH http://localhost:1234/wallet/19
 Content-Type: application/json
 
 {
-    "is_default": "tmort"
+    "is_default": true
 }
 
 ###
@@ -54,7 +54,7 @@ POST http://localhost:1234/event/new/15
 Content-Type: application/json
 
 {
-    "type": "buy",
+    "type": 1,
     "date": "2020-11-12 12:56:43.435891+01",
     "quantity": 2,
     "total_amount": 32000,

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { WalletInformations, WalletInformationsEdit } from '../interface/interface';
+import {editWalletInt, newWalletInt} from '../interface/interface';
 import { Wallet } from '../models/Wallet'
 
 
@@ -54,21 +54,28 @@ export class WalletController  {
             const wallets = await this.wallet.showWalletByUserId(userId)
     
             if (!wallets) {
-                req.body.is_default = 1
+                req.body.is_default = true
             } else {
                 for (let elem of wallets) {
                     if(req.body.name === elem.name) {
                         throw new Error('a wallet is already named this way')
                     }
                 }
-                req.body.is_default = '0'
+                req.body.is_default = false
             }
     
             req.body.user_id = userId
 
-            const result = await this.wallet.insert(req.body)
+            // type guard treatment
+            if (this.isWalletNew(req.body)) {
+                let walletInfo: newWalletInt = req.body
+                const result = await this.wallet.insert(walletInfo)
+                return res.json(result)
+            } else {
+                throw new Error('Invalid Wallet format')
+            }
+
     
-            return res.json(result)
 
         } catch (error) {
             return res.json('error: ' + error.message)
@@ -91,11 +98,11 @@ export class WalletController  {
             const wallets = await this.wallet.showWalletByUserId(userId)
     
             // is_default: false to true
-            if (!!wallets && wallets.length > 1 && wallet.is_default === false && req.body.is_default == 1) {
+            if (!!wallets && wallets.length > 1 && wallet.is_default === false && req.body.is_default == true) {
     
                 for (let elem of wallets) {
                     if (elem.is_default === true) {
-                        elem.is_default = '0'
+                        elem.is_default = false
                         
                         await this.wallet.update(elem)
                     }
@@ -123,12 +130,19 @@ export class WalletController  {
             }
     
             req.body.id = wallet.id
-    
-            const walletInfo: WalletInformationsEdit = req.body 
-    
-            const result: WalletInformations = await this.wallet.update(walletInfo)
-    
-            return res.json(result)
+            req.body.user_id = wallet.user_id
+
+
+            // type guard treatment
+            if (this.isWalletEdit(req.body)) {
+                let walletInfo: editWalletInt = req.body
+                const result = await this.wallet.update(walletInfo)
+                return res.json(result)
+
+            } else {
+                throw new Error('Invalid Wallet format')
+            }
+
             
         } catch (error) {
             return res.json('error: ' + error.message)
@@ -164,8 +178,14 @@ export class WalletController  {
 
         }
 
+    }
 
+    private isWalletEdit(elem: any): elem is editWalletInt {
+        return typeof elem.id === 'number' && typeof elem.name === 'string' && typeof elem.is_default === 'boolean' && typeof elem.user_id === 'number'
+    }
 
+    private isWalletNew(elem: any): elem is newWalletInt {
+        return typeof elem.name === 'string' && typeof elem.is_default === 'boolean' && typeof elem.user_id === 'number'
     }
 
 }
