@@ -14,11 +14,8 @@ export async function bodyControl(body: any) {
     // B&S + total amount
     if((body.type === 'buy' && body.total_amount) || (body.type === 'sell' && body.total_amount)) {
 
-        // checking required fields -> throw an error if problems
-        formControl.requiredFields(body, formControl.buySellAmountFields)
-
-        // checking if user get enough fund -> throw an error if problems
-        if (body.type === 'sell') {checkFund(body)}
+        // check if informations are conform
+        await isBodyConform(body, formControl.buySellAmountFields)
 
         // get value of crypto in dollars
         const value = await bodyData(body)
@@ -43,14 +40,83 @@ export async function bodyControl(body: any) {
         }
         
         // add the currency into the DB to get prices --> if error with the DB, throw an error
-        isNeeded(body.currency_asset)
+        await isNeeded(body.currency_asset)
 
         // return body updated
         return body;
     }
     // B&S + unit price
-    
+
+    if((body.type === 'buy' && body.unit_price) || (body.type === 'sell' && body.unit_price)) {
+
+        // check if informations are conform
+        await isBodyConform(body, formControl.buySellUnitFields)
+
+        // get value of crypto in dollars
+        const value = await bodyData(body)
+
+        // define ref_usd_amount
+        const usd_amount = body.unit_price * body.quantity * value.counterPartyInDollar;
+        body.ref_usd_amount = parseInt(usd_amount.toFixed(2));
+
+        // define total_amount
+        body.total_amount = body.unit_price/ body.quantity
+
+        // define note
+        if (!body.note) {body.note = '-'}
+
+        // define ref_usd_fees
+        if (!body.fees) {
+            body.currency_fees = '-'
+            body.fees = 0;
+            body.ref_usd_fees = 0;
+        } else {
+            body.ref_usd_fees = body.fees * value.feesInDollar;
+        }
+        
+        // add the currency into the DB to get prices --> if error with the DB, throw an error
+        await isNeeded(body.currency_asset)
+
+        // return body updated
+        return body;
+
+    }
+
     // T
+
+    if(body.type === 'transfer') {
+
+        // check if informations are conform
+        await isBodyConform(body, formControl.transferFields)
+
+        // get value of crypto in dollars
+        const value = await bodyData(body)
+
+        body.total_amount = 0;
+        body.unit_price = 0;
+        body.ref_usd_amount = 0;
+        body.currency_counterparty = '-';
+
+
+        // define note
+        if (!body.note) {body.note = '-'}
+
+
+        // define ref_usd_fees
+        if (!body.fees) {
+            body.currency_fees = '-'
+            body.fees = 0;
+            body.ref_usd_fees = 0;
+        } else {
+            body.ref_usd_fees = body.fees * value.feesInDollar;
+        }
+
+
+
+      // return body updated
+      return body;
+
+    }
     // R
 
 
@@ -215,19 +281,24 @@ async function checkFund(body: any) {
           // pushing every exchange in a array
           currentExchange.push(elem.exchange);
 
+
+            console.log('elem', elem);
+            console.log('body', body);
+            
+            
           // if an exchange and currency match
-          if (elem.asset === body.currency_asset && elem.exchange === body.platform_receiving) {
+          if (elem.asset === body.currency_asset && elem.exchange === body.platform_sending) {
             // if the quantity to sell is superior at what the user own -> error
             if (elem.quantity - body.quantity < 0) {
               throw new Error(
-                `The quantity of ${body.currency_asset} that you own on ${body.platform_receiving} is inferior of the quantity that you are trying to sell`
+                `The quantity of ${body.currency_asset} that you own on ${body.platform_sending} is inferior of the quantity that you are trying to sell`
               );
             }
           }
         }
 
         // handling exchange's array
-        const isTrue = currentExchange.includes(body.platform_receiving);
+        const isTrue = currentExchange.includes(body.platform_sending);
 
         // if the platform does not exist in current user event -> error
         if (isTrue === false) {
@@ -275,5 +346,13 @@ async function isNeeded(currency: string) {
         'We apologize, we are not able to respond to your inquirie'
       );
     }
+}
+
+async function isBodyConform(body: any, fields: any) {
+    // checking required fields -> throw an error if problems
+    formControl.requiredFields(body, fields)
+    
+    // checking if user get enough fund -> throw an error if problems
+    if (body.type === 'sell' || body.type === 'transfer') {await checkFund(body)}
 }
 
