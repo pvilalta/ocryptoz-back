@@ -63,6 +63,7 @@ export interface newEventInt {
     currency_fees: number,
     wallet_id: number,
     ref_usd_amount: number,
-    ref_usd_fees: number
+    ref_usd_fees: number,
+    created_at: Date
 }
 

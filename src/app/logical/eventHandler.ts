@@ -38,7 +38,9 @@ export async function bodyControl(body: any) {
         } else {
           body.ref_usd_fees = body.fees * value.feesInDollar;
         }
-        
+
+        body.created_at = new Date
+
         // add the currency into the DB to get prices --> if error with the DB, throw an error
         await isNeeded(body.currency_asset)
 
@@ -73,6 +75,8 @@ export async function bodyControl(body: any) {
         } else {
             body.ref_usd_fees = body.fees * value.feesInDollar;
         }
+
+        body.created_at = new Date
         
         // add the currency into the DB to get prices --> if error with the DB, throw an error
         await isNeeded(body.currency_asset)
@@ -83,7 +87,6 @@ export async function bodyControl(body: any) {
     }
 
     // T
-
     if(body.type === 'transfer') {
 
         // check if informations are conform
@@ -111,13 +114,52 @@ export async function bodyControl(body: any) {
             body.ref_usd_fees = body.fees * value.feesInDollar;
         }
 
-
+        body.created_at = new Date
 
       // return body updated
       return body;
 
     }
     // R
+    if(body.type === 'reward') {
+
+        // check if informations are conform
+        await isBodyConform(body, formControl.rewardFields)
+
+        // get value of crypto in dollars
+        const value = await bodyData(body)
+
+        // add the currency into the DB to get prices --> if error with the DB, throw an error
+        await isNeeded(body.currency_asset)
+
+        body.total_amount = 0;
+        body.unit_price = 0;
+        body.ref_usd_amount = 0;
+        body.currency_counterparty = '-';
+
+
+        // define note
+        if (!body.note) {body.note = '-'}
+
+
+        // define ref_usd_fees
+        if (!body.fees) {
+            body.currency_fees = '-'
+            body.fees = 0;
+            body.ref_usd_fees = 0;
+        } else {
+            body.ref_usd_fees = body.fees * value.feesInDollar;
+        }
+
+        body.created_at = new Date
+
+      // return body updated
+      return body;
+
+
+    }
+
+
 
 
 }

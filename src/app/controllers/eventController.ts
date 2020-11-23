@@ -31,8 +31,6 @@ export class EventController  {
 
             // body treatment
             req.body = await bodyControl(req.body)
-
-            console.log(req.body)
                         
             // type guard treatment
             if (this.isEventNew(req.body)) {
@@ -69,6 +67,7 @@ export class EventController  {
             && typeof elem.wallet_id === 'number' 
             && typeof elem.ref_usd_amount === 'number' 
             && typeof elem.ref_usd_fees === 'number'
+            && elem.created_at instanceof Date
     }
 
 }
