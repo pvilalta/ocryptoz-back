@@ -61,3 +61,12 @@ Content-Type: application/json
     "platform_receiving": "binance",
     "currency_asset": "bitcoin"
 }
+
+###
+
+PATCH http://localhost:1234/event/94
+Content-Type: application/json
+
+{
+    "quantity": 2000,
+}

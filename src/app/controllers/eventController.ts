@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { newEventInt } from '../interface/interface';
+import { newEventInt, newWalletInt } from '../interface/interface';
 import { Event } from '../models/Event'
 import { Wallet } from '../models/Wallet';
 import { bodyControl } from '../logical/eventHandler';
@@ -49,6 +49,67 @@ export class EventController  {
 
 
     }
+
+    public async editEventForm(req: Request, res: Response): Promise<Response>  {
+
+        try {
+
+            const userId = 12
+
+            const eventId = parseInt(req.params.eventId, 10)
+            
+            let currentEvent: newEventInt = await this.event.findOne(eventId)            
+
+            if (!currentEvent) throw new Error(`This event does not exist`);
+    
+            const wallet: newWalletInt = await this.wallet.getOneWalletByUserId(currentEvent.wallet_id, userId)   
+
+            if (!wallet) throw new Error('This event does not exist')
+            
+            // let dataToModify: any = {
+            //     id: eventId
+            // }
+
+            // for (let elem in req.body) {
+            //     dataToModify[elem] = req.body[elem]
+
+            // }
+
+            for (let elem in req.body) {
+                
+                if(currentEvent[elem]) {
+                    currentEvent[elem] = req.body[elem]
+                }
+            }
+
+            console.log(currentEvent);
+
+
+            // body treatment
+            currentEvent = await bodyControl(currentEvent)
+
+            
+
+            // type guard treatment
+            if (this.isEventNew(currentEvent)) {
+                let eventInfo: newEventInt = currentEvent
+                const result = await this.event.update(eventInfo)
+                return res.json(result)
+
+            } else {
+                throw new Error('Invalid Event format')
+            }
+
+            
+        } catch (error) {
+            return res.json('error: ' + error.message)
+
+        }
+
+
+    }
+
+
 
     private isEventNew(elem: any): elem is newEventInt {
 
