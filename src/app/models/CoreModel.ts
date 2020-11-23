@@ -1,5 +1,5 @@
 import db from "../config/db"
-import { editUserInt, editWalletInt, newUserInt, newWalletInt} from "../interface/interface";
+import { editUserInt, editWalletInt, newEventInt, newUserInt, newWalletInt} from "../interface/interface";
 
 
 export abstract class CoreModel {
@@ -54,7 +54,7 @@ export abstract class CoreModel {
         }
     }
 
-    public async insert(value: newUserInt | newWalletInt): Promise<any[]> {
+    public async insert(value: newUserInt | newWalletInt | newEventInt): Promise<any[]> {
 
         try {
             let filterFields = []

@@ -46,22 +46,23 @@ export interface editWalletInt {
  * EVENT
  */
 
-export interface SubmitEventInformations {
+export interface newEventInt {
     [key: string]: number | string | boolean | Date | undefined;
 
-    id?: number,
     type: string,
     date: Date,
     quantity: number,
-    total_amount?: number,
-    unit_price?: number,
-    fees?: number,
-    note?: string,
+    total_amount: number,
+    unit_price: number,
+    fees: number,
+    note: string,
     platform_sending: string,
     platform_receiving: string,
     currency_asset: string,
-    currency_counterparty?: string,
-    currency_fees?: number,
-    wallet_id: number
+    currency_counterparty: string,
+    currency_fees: number,
+    wallet_id: number,
+    ref_usd_amount: number,
+    ref_usd_fees: number
 }
 
