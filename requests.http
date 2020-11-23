@@ -54,10 +54,10 @@ POST http://localhost:1234/event/new/15
 Content-Type: application/json
 
 {
-    "type": "transfer",
+    "type": "reward",
     "date": "2020-11-12 12:56:43.435891+01",
     "quantity": 3,
     "platform_sending": "binance",
-    "platform_receiving": "kraken",
+    "platform_receiving": "binance",
     "currency_asset": "bitcoin"
 }
