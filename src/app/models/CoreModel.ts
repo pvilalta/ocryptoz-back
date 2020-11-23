@@ -81,7 +81,7 @@ export abstract class CoreModel {
         }
     }
 
-    public async update(value: editWalletInt | editUserInt): Promise<any> {
+    public async update(value: editWalletInt | editUserInt | newEventInt): Promise<any> {
 
         try {
 

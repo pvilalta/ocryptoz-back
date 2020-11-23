@@ -6,6 +6,12 @@ const controller = new EventController()
 router
     .route('/event/new/:walletId')
     .post(controller.submitEventForm.bind(controller))
+;
+
+router
+    .route('/event/:eventId')
+    .patch(controller.editEventForm.bind(controller))
+;
 
 
 

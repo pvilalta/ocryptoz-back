@@ -5,13 +5,13 @@ import db from "../config/db"
 
 export async function bodyControl(body: any) {
 
-    if(body.total_amount && body.unit_price) {
+    if(!body.id && body.total_amount && body.unit_price) {
         throw new Error(
             'You have to choose either total amount or unit price to declare your event but not both at the same time'
         );
     }    
     
-    // B&S + total amount
+    // B&S + TOTAL AMOUNT
     if((body.type === 'buy' && body.total_amount) || (body.type === 'sell' && body.total_amount)) {
 
         // check if informations are conform
@@ -39,7 +39,7 @@ export async function bodyControl(body: any) {
           body.ref_usd_fees = body.fees * value.feesInDollar;
         }
 
-        body.created_at = new Date
+        if(!body.created_at) {body.created_at = new Date}
 
         // add the currency into the DB to get prices --> if error with the DB, throw an error
         await isNeeded(body.currency_asset)
@@ -47,8 +47,8 @@ export async function bodyControl(body: any) {
         // return body updated
         return body;
     }
-    // B&S + unit price
 
+    // B&S + UNIT PRICE
     if((body.type === 'buy' && body.unit_price) || (body.type === 'sell' && body.unit_price)) {
 
         // check if informations are conform
@@ -76,7 +76,7 @@ export async function bodyControl(body: any) {
             body.ref_usd_fees = body.fees * value.feesInDollar;
         }
 
-        body.created_at = new Date
+        if(!body.created_at) {body.created_at = new Date}
         
         // add the currency into the DB to get prices --> if error with the DB, throw an error
         await isNeeded(body.currency_asset)
@@ -86,7 +86,7 @@ export async function bodyControl(body: any) {
 
     }
 
-    // T
+    // TRANSFER
     if(body.type === 'transfer') {
 
         // check if informations are conform
@@ -114,44 +114,31 @@ export async function bodyControl(body: any) {
             body.ref_usd_fees = body.fees * value.feesInDollar;
         }
 
-        body.created_at = new Date
+        if(!body.created_at) {body.created_at = new Date}
 
       // return body updated
       return body;
 
     }
-    // R
+    // REWARD
     if(body.type === 'reward') {
 
         // check if informations are conform
         await isBodyConform(body, formControl.rewardFields)
 
-        // get value of crypto in dollars
-        const value = await bodyData(body)
-
         // add the currency into the DB to get prices --> if error with the DB, throw an error
         await isNeeded(body.currency_asset)
 
+        // define properties
         body.total_amount = 0;
         body.unit_price = 0;
         body.ref_usd_amount = 0;
         body.currency_counterparty = '-';
-
-
-        // define note
+        body.currency_fees = '-'
+        body.fees = 0;
+        body.ref_usd_fees = 0;
         if (!body.note) {body.note = '-'}
-
-
-        // define ref_usd_fees
-        if (!body.fees) {
-            body.currency_fees = '-'
-            body.fees = 0;
-            body.ref_usd_fees = 0;
-        } else {
-            body.ref_usd_fees = body.fees * value.feesInDollar;
-        }
-
-        body.created_at = new Date
+        if (!body.created_at) {body.created_at = new Date}
 
       // return body updated
       return body;
