@@ -4,12 +4,12 @@ POST http://localhost:1234/account
 Content-Type: application/json
 
 {
-    "firstname": "malek",
-    "lastname": "nardine",
-    "email": "malek@espana.fr",
+    "firstname": "Enrico",
+    "lastname": "Macias",
+    "email": "enricom@espana.fr",
     "password": "yop",
     "passwordConfirmation": "yop",
-    "country": "maroc"
+    "country": "espagne"
 }
 
 ###
@@ -32,7 +32,7 @@ POST http://localhost:1234/wallet
 Content-Type: application/json
 
 {
-    "name": "le wallet de c mort"
+    "name": "long term investment"
 }
 
 ###
@@ -40,7 +40,7 @@ PATCH http://localhost:1234/wallet/21
 Content-Type: application/json
 
 {
-    "name": "pute"
+    "name": "short term investment"
 }
 
 ###
