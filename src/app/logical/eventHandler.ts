@@ -1,9 +1,8 @@
 const fetchAPI = require('node-fetch');
-import { isUnparsedPrepend } from "typescript";
 import db from "../config/db"
 
 
-export async function bodyControl(body: any) {
+export async function bodyControl(body: any, priceType?: string | undefined) {
 
     if(!body.id && body.total_amount && body.unit_price) {
         throw new Error(
@@ -12,13 +11,13 @@ export async function bodyControl(body: any) {
     }    
     
     // B&S + TOTAL AMOUNT
-    if((body.type === 'buy' && body.total_amount) || (body.type === 'sell' && body.total_amount)) {
+    if((body.type === 'buy' && body.total_amount && (priceType === undefined || priceType === 'totalAmount')) || (body.type === 'sell' && body.total_amount && (priceType === undefined || priceType === 'totalAmount'))) {
 
         // check if informations are conform
         await isBodyConform(body, formControl.buySellAmountFields)
 
         // get value of crypto in dollars
-        const value = await bodyData(body)
+        const value = await bodyData(body)        
 
         // define ref_usd_amount
         const usd_amount = body.total_amount * value.counterPartyInDollar;
@@ -49,7 +48,10 @@ export async function bodyControl(body: any) {
     }
 
     // B&S + UNIT PRICE
-    if((body.type === 'buy' && body.unit_price) || (body.type === 'sell' && body.unit_price)) {
+    if((body.type === 'buy' && body.unit_price && (priceType === undefined || priceType === 'unitPrice')) || (body.type === 'sell' && body.unit_price && (priceType === undefined || priceType === 'unitPrice'))) {
+
+        console.log('here');
+        
 
         // check if informations are conform
         await isBodyConform(body, formControl.buySellUnitFields)
@@ -62,7 +64,7 @@ export async function bodyControl(body: any) {
         body.ref_usd_amount = parseInt(usd_amount.toFixed(2));
 
         // define total_amount
-        body.total_amount = body.unit_price/ body.quantity
+        body.total_amount = body.unit_price * body.quantity
 
         // define note
         if (!body.note) {body.note = '-'}
@@ -145,10 +147,6 @@ export async function bodyControl(body: any) {
 
 
     }
-
-
-
-
 }
 
 async function bodyData(body: any) {
@@ -164,22 +162,22 @@ async function bodyData(body: any) {
     let counterPartyInDollar;
     if (!!counterParty) {
         counterPartyInDollar = await fetchConversion(
-        counterParty,
-        convDate.fiatDate,
-        convDate.cryptoDate
+            counterParty,
+            convDate.fiatDate,
+            convDate.cryptoDate
         );
     }
 
     // get fees in dollar
     let feesInDollar;
-    if (!!feeCurrency) {
+    if (!!feeCurrency && feeCurrency > 0) {
         feesInDollar = await fetchConversion(
-        feeCurrency,
-        convDate.fiatDate,
-        convDate.cryptoDate
+            feeCurrency,
+            convDate.fiatDate,
+            convDate.cryptoDate
         );
     }    
-
+    
     return { counterPartyInDollar, feesInDollar };
 
 }
@@ -262,14 +260,14 @@ async function fetchConversion(devise: string, fiatDate: string, cryptoDate: str
           `https://api.exchangeratesapi.io/history?start_at=${fiatDate}&end_at=${fiatDate}&symbols=USD`
         );
   
-        const formatedData = await response.json();
+        const formatedData = await response.json();        
   
         if (!formatedData.rates) {
           throw new Error(
             'We apologize, we are not able to respond to your request'
           );
-        }
-  
+        }  
+            
         // returning value
         return formatedData.rates[fiatDate]['USD'];
     } else if (devise === 'usd') {

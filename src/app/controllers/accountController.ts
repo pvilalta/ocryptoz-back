@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { User } from '../models/User'
 import * as bcrypt from 'bcrypt'
-import { editUserInt, newUserInt } from '../interface/interface'
+import { AccountInt } from '../interface/interface'
 
 
 export class AccountController {
@@ -64,8 +64,8 @@ export class AccountController {
             req.body.password = await bcrypt.hash(req.body.password, 10)
             
             // type guard treatment
-            if (this.isAccountNew(req.body)) {
-                let userInfo: newUserInt = req.body
+            if (this.isAccount(req.body)) {
+                let userInfo: AccountInt = req.body
                 const result = await this.user.insert(userInfo)
                 return res.json(result)
             } else {
@@ -114,16 +114,16 @@ export class AccountController {
 
                 }
                 
-                // fitting expected format
-                req.body.id = id;
-                if (!req.body.email) {req.body.email = isUserExist.email}
-                if (!req.body.password) {req.body.password = isUserExist.password}
-                if (!req.body.country) {req.body.country = isUserExist.country}
+                // push modification into the user object
+                for (let elem in req.body) {
+                    if(isUserExist[elem]) {
+                        isUserExist[elem] = req.body[elem]
+                    }
+                }
                 
                 // type guard treatment
-                if (this.isAccountEdit(req.body)) {
-                    let userInfo: editUserInt = req.body
-                    const result = await this.user.update(userInfo)
+                if (this.isAccount(isUserExist)) {
+                    const result = await this.user.update(isUserExist)
                     return res.json(result)
                 } else {
                     throw new Error('Invalid Account format')
@@ -157,12 +157,12 @@ export class AccountController {
 
     }
 
-    private isAccountEdit(elem: any): elem is editUserInt {
-        return typeof elem.id === 'number' && typeof elem.email === 'string' && typeof elem.password === 'string' && typeof elem.country === 'string'
-    }
-
-    private isAccountNew(elem: any): elem is newUserInt {
-        return typeof elem.firstname === 'string' && typeof elem.lastname === 'string' && typeof elem.email === 'string' && typeof elem.password === 'string' && typeof elem.country === 'string'
+    private isAccount(elem: any): elem is AccountInt {
+        return typeof elem.firstname === 'string' 
+            && typeof elem.lastname === 'string' 
+            && typeof elem.email === 'string' 
+            && typeof elem.password === 'string' 
+            && typeof elem.country === 'string'
     }
 
 }

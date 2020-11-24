@@ -1,11 +1,9 @@
 import db from "../config/db"
-import { editUserInt, editWalletInt, newEventInt, newUserInt, newWalletInt} from "../interface/interface";
+import { AccountInt, WalletInt, EventInt } from "../interface/interface";
 
 
 export abstract class CoreModel {
-    
-    // constructor(public id: number){}
-    
+        
     public async findAll(): Promise<any[]> {
                 
         try {            
@@ -54,7 +52,7 @@ export abstract class CoreModel {
         }
     }
 
-    public async insert(value: newUserInt | newWalletInt | newEventInt): Promise<any[]> {
+    public async insert(value: AccountInt | WalletInt | EventInt): Promise<any[]> {
 
         try {
             let filterFields = []
@@ -81,7 +79,7 @@ export abstract class CoreModel {
         }
     }
 
-    public async update(value: editWalletInt | editUserInt | newEventInt): Promise<any> {
+    public async update(value: AccountInt | WalletInt | EventInt): Promise<any> {
 
         try {
 
