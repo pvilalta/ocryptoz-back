@@ -11,6 +11,7 @@ router
 router
     .route('/event/:eventId')
     .patch(controller.editEventForm.bind(controller))
+    .delete(controller.deleteEvent.bind(controller))
 ;
 
 

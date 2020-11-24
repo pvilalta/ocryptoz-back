@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import {editWalletInt, newWalletInt} from '../interface/interface';
+import { WalletInt } from '../interface/interface';
 import { Wallet } from '../models/Wallet'
 
 
@@ -49,7 +49,7 @@ export class WalletController  {
 
         try {
             
-            const userId = 12
+            const userId = 16
 
             const wallets = await this.wallet.showWalletByUserId(userId)
     
@@ -67,9 +67,8 @@ export class WalletController  {
             req.body.user_id = userId
 
             // type guard treatment
-            if (this.isWalletNew(req.body)) {
-                let walletInfo: newWalletInt = req.body
-                const result = await this.wallet.insert(walletInfo)
+            if (this.isWallet(req.body)) {
+                const result = await this.wallet.insert(req.body)
                 return res.json(result)
             } else {
                 throw new Error('Invalid Wallet format')
@@ -87,7 +86,7 @@ export class WalletController  {
 
         try {
 
-            const userId = 12
+            const userId = 16
 
             const walletId = parseInt(req.params.walletId, 10)   
     
@@ -123,20 +122,18 @@ export class WalletController  {
                     );
                   }
             }
-    
-            // if name user does not give name to his portfolio
-            if (!req.body.name) {
-                req.body.name = wallet.name;
+
+            // push modification into the event
+            for (let elem in req.body) {
+                if(wallet[elem]) {
+                    wallet[elem] = req.body[elem]
+                }
             }
-    
-            req.body.id = wallet.id
-            req.body.user_id = wallet.user_id
 
 
             // type guard treatment
-            if (this.isWalletEdit(req.body)) {
-                let walletInfo: editWalletInt = req.body
-                const result = await this.wallet.update(walletInfo)
+            if (this.isWallet(wallet)) {
+                const result = await this.wallet.update(wallet)
                 return res.json(result)
 
             } else {
@@ -156,7 +153,7 @@ export class WalletController  {
 
         try {
 
-            const userId = 12
+            const userId = 16
 
             const walletId = parseInt(req.params.walletId, 10)   
     
@@ -180,12 +177,11 @@ export class WalletController  {
 
     }
 
-    private isWalletEdit(elem: any): elem is editWalletInt {
-        return typeof elem.id === 'number' && typeof elem.name === 'string' && typeof elem.is_default === 'boolean' && typeof elem.user_id === 'number'
-    }
 
-    private isWalletNew(elem: any): elem is newWalletInt {
-        return typeof elem.name === 'string' && typeof elem.is_default === 'boolean' && typeof elem.user_id === 'number'
+    private isWallet(elem: any): elem is WalletInt {
+        return typeof elem.name === 'string' 
+            && typeof elem.is_default === 'boolean' 
+            && typeof elem.user_id === 'number'
     }
 
 }

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { newEventInt, newWalletInt } from '../interface/interface';
+import { EventInt, WalletInt } from '../interface/interface';
 import { Event } from '../models/Event'
 import { Wallet } from '../models/Wallet';
 import { bodyControl } from '../logical/eventHandler';
@@ -17,12 +17,10 @@ export class EventController  {
 
         try {
 
-            const userId = 12
-
+            const userId = 16
             const walletId = parseInt(req.params.walletId, 10)            
     
             const wallet = await this.wallet.getOneWalletByUserId(walletId, userId)   
-
             if (!wallet) throw new Error('This wallet does not exist')
     
             // defining properties
@@ -33,9 +31,8 @@ export class EventController  {
             req.body = await bodyControl(req.body)
                         
             // type guard treatment
-            if (this.isEventNew(req.body)) {
-                let eventInfo: newEventInt = req.body
-                const result = await this.event.insert(eventInfo)
+            if (this.isEvent(req.body)) {
+                const result = await this.event.insert(req.body)
                 return res.json(result)
 
             } else {
@@ -54,46 +51,29 @@ export class EventController  {
 
         try {
 
-            const userId = 12
-
+            // get user info
+            const userId = 16
             const eventId = parseInt(req.params.eventId, 10)
             
-            let currentEvent: newEventInt = await this.event.findOne(eventId)            
+            let { currentEvent } = await this.isEventOwnedByUser(userId, eventId)
 
-            if (!currentEvent) throw new Error(`This event does not exist`);
-    
-            const wallet: newWalletInt = await this.wallet.getOneWalletByUserId(currentEvent.wallet_id, userId)   
-
-            if (!wallet) throw new Error('This event does not exist')
-            
-            // let dataToModify: any = {
-            //     id: eventId
-            // }
-
-            // for (let elem in req.body) {
-            //     dataToModify[elem] = req.body[elem]
-
-            // }
-
+            // push modification into the event
             for (let elem in req.body) {
-                
                 if(currentEvent[elem]) {
                     currentEvent[elem] = req.body[elem]
                 }
             }
 
-            console.log(currentEvent);
+            // select either unit_price or total_amount
+            let priceType = this.typePrice(req.body)
 
-
-            // body treatment
-            currentEvent = await bodyControl(currentEvent)
-
+            // body treatment (to re-perform maths)
+            currentEvent = await bodyControl(currentEvent, priceType)
             
-
+            
             // type guard treatment
-            if (this.isEventNew(currentEvent)) {
-                let eventInfo: newEventInt = currentEvent
-                const result = await this.event.update(eventInfo)
+            if (this.isEvent(currentEvent)) {
+                const result = await this.event.update(currentEvent)
                 return res.json(result)
 
             } else {
@@ -105,13 +85,33 @@ export class EventController  {
             return res.json('error: ' + error.message)
 
         }
+    }
 
+    public async deleteEvent(req: Request, res: Response): Promise<Response>  {
+
+        try {
+            // get user info
+            const userId = 16
+            const eventId = parseInt(req.params.eventId, 10)
+
+            // is Event owned by this user ?
+            let { currentEvent } = await this.isEventOwnedByUser(userId, eventId)
+
+            // if yes, proceed to the delete of the event
+            const result = await this.event.delete(currentEvent.id)
+
+            // end point
+            return res.json(result)
+        } catch (error) {
+            return res.json('error: ' + error.message)
+
+        }
 
     }
 
 
 
-    private isEventNew(elem: any): elem is newEventInt {
+    private isEvent(elem: any): elem is EventInt {
 
         return typeof elem.type === 'string' 
             && elem.date instanceof Date 
@@ -129,6 +129,37 @@ export class EventController  {
             && typeof elem.ref_usd_amount === 'number' 
             && typeof elem.ref_usd_fees === 'number'
             && elem.created_at instanceof Date
+    }
+
+    private async isEventOwnedByUser(userId: number, eventId: number): Promise<any> {
+        // get event + handling error
+        const currentEvent: EventInt = await this.event.findOne(eventId)            
+        if (!currentEvent) throw new Error(`This event does not exist`);
+
+        //  get user's wallet + handling error
+        const wallet: WalletInt = await this.wallet.getOneWalletByUserId(currentEvent.wallet_id, userId)   
+        if (!wallet) throw new Error('This event does not exist')
+
+        return {
+            currentEvent,
+            wallet
+        }
+    }
+
+    private typePrice(body: any): any {
+
+        if (body.unit_price && !body.total_amount) {
+            return 'unitPrice'
+
+         } else if (!body.unit_price && body.total_amount) {
+             return 'totalAmount'
+
+         } else if (body.unit_price && body.total_amount){
+             throw new Error(
+                 'You have to choose either total amount or unit price to declare your event but not both at the same time'
+             );
+         }
+
     }
 
 }
