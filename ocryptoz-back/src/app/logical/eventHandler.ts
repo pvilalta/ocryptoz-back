@@ -4,9 +4,9 @@ import db from "../config/db"
 
 export async function bodyControl(body: any, priceType?: string | undefined) {
 
-    if(!body.id && body.total_amount && body.unit_price) {
+    if(!body.id && body.total_amount && body.unit_price || !body.id && !body.total_amount && !body.unit_price) {
         throw new Error(
-            'You have to choose either total amount or unit price to declare your event but not both at the same time'
+            'You have to choose either total amount or unit price to declare your event'
         );
     }
     

@@ -3,7 +3,7 @@ import { AccountController } from '../controllers/accountController'
 const router = Router()
 const controller = new AccountController()
 
-import userSchema from '../validations/schema';
+import {userSchema} from '../validations/schema';
 const { validateBody } = require('../validations/validate');
 
 
