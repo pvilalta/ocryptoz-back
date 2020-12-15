@@ -27,10 +27,13 @@ export class EventController  {
             req.body.wallet_id = walletId
             req.body.date = new Date(req.body.date)
 
+            console.log('before treatment req.body', req.body)
 
 
             // body treatment
             req.body = await bodyControl(req.body)
+
+            console.log('after treatment req.body', req.body)
 
                         
             // type guard treatment
