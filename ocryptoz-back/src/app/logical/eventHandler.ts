@@ -8,7 +8,19 @@ export async function bodyControl(body: any, priceType?: string | undefined) {
         throw new Error(
             'You have to choose either total amount or unit price to declare your event but not both at the same time'
         );
-    }    
+    }
+    
+    if (body.currency_asset) { 
+      body.currency_asset = await nameToSlug(body.currency_asset)
+    }
+
+    if (body.currency_counterparty) { 
+      body.currency_counterparty = await nameToSlug(body.currency_counterparty)
+    }
+
+    if (body.currency_fees) { 
+      body.currency_fees = await nameToSlug(body.currency_fees)
+    }
     
     // B&S + TOTAL AMOUNT
     if((body.type === 'buy' && body.total_amount && (priceType === undefined || priceType === 'totalAmount')) || (body.type === 'sell' && body.total_amount && (priceType === undefined || priceType === 'totalAmount'))) {
@@ -262,8 +274,8 @@ async function fetchConversion(devise: string, fiatDate: string, cryptoDate: str
   
         if (!formatedData.rates) {
           throw new Error(
-            'We apologize, we are not able to respond to your request'
-          );
+            'We apologize, we cannot handle your request'
+            );
         }  
             
         // returning value
@@ -280,8 +292,8 @@ async function fetchConversion(devise: string, fiatDate: string, cryptoDate: str
   
         if (!formatedData.market_data) {
           throw new Error(
-            'We apologize, we are not able to respond to your request'
-          );
+            'We apologize, we cannot handle your request'
+            );
         }
   
         // returning value
@@ -364,7 +376,7 @@ async function isNeeded(currency: string) {
     // error treatment if is_needed doest not work
     if (result.rowCount === 0) {
       throw new Error(
-        'We apologize, we are not able to respond to your inquirie'
+        'We apologize, we cannot handle your request'
       );
     }
 }
@@ -375,5 +387,23 @@ async function isBodyConform(body: any, fields: any) {
     
     // checking if user get enough fund -> throw an error if problems
     if (body.type === 'sell' || body.type === 'transfer') {await checkFund(body)}
+}
+
+async function nameToSlug(value: string) {
+
+  try {
+    
+    const result = await db.query(
+      `SELECT * FROM "currency" WHERE name = '${value}'`
+    );
+
+    return result.rows[0].slug;
+
+  } catch (error) {
+    throw new Error('We apologize, we cannot handle your request')
+
+  }
+
+  
 }
 

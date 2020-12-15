@@ -7,6 +7,8 @@ const cors = require('cors')
 import accountRouter from './app/routers/accountRouter';
 import walletRouter from './app/routers/walletRouter';
 import eventRouter from './app/routers/eventRouter';
+import contentRouter from './app/routers/contentRouter';
+
 
 
 const app = express();
@@ -26,7 +28,7 @@ app.use(cookieParser());
 
 const port = process.env.PORT || 3000;
 
-app.use(accountRouter, walletRouter, eventRouter);
+app.use(accountRouter, walletRouter, eventRouter, contentRouter);
 
 app.listen(port, () => {
   console.log(`http://localhost:${port}`);
