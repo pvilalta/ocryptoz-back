@@ -6,18 +6,25 @@ const controller = new WalletController()
 
 router
     .route('/wallet')
-    .get(controller.showWallets.bind(controller))
+    .get(verifyToken, controller.showWallets.bind(controller))
     .post(controller.submitWalletForm.bind(controller))
 
 router
     .route('/wallet/:walletId')
     .get(verifyToken, controller.getOneWallet.bind(controller))
-    .patch(verifyToken, controller.updateWallet.bind(controller))
-    .delete(verifyToken, controller.deleteWallet.bind(controller))
+    .patch( controller.updateWallet.bind(controller))
+    .delete( controller.deleteWallet.bind(controller))
 
 router
     .route('/main/wallet')
-    .get(controller.getMainWallet.bind(controller))
+    .get(verifyToken, controller.getMainWallet.bind(controller))
+
+
+
+router
+    .route('/wallet/assetpie/:walletId')
+    .get(controller.showAssetPie.bind(controller))
+;
 
 
 export default router 

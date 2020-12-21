@@ -12,7 +12,7 @@ export class WalletController  {
 
         try {
 
-            const userId = 10
+            const userId = res.locals.token.id
             
             const result = await this.wallet.showWalletByUserId(userId)
 
@@ -21,7 +21,7 @@ export class WalletController  {
             return res.json('You do not own any wallet yet')
 
         } catch (error) {
-            return res.json('error: ' + error.message)
+            return res.status(400).json(error.message);
         }
     }
 
@@ -48,7 +48,7 @@ export class WalletController  {
     public async getMainWallet(req: Request, res: Response): Promise<Response>{
 
         try {            
-            const userId = 9
+            const userId = res.locals.token.id
 
             const result = await this.wallet.showWalletByUserId(userId)
     
@@ -193,6 +193,23 @@ export class WalletController  {
 
         } catch (error) {
             return res.json('error: ' + error.message)
+
+        }
+
+    }
+
+    public async showAssetPie (req: Request, res: Response): Promise<Response> {
+
+        try {
+
+            const id: number = parseInt(req.params.walletId, 10)
+
+            const assetPie = await this.wallet.assetPie(id)
+
+            return res.json(assetPie)
+
+        } catch (error) {
+            return res.status(400).json(error.message);
 
         }
 
