@@ -2,10 +2,8 @@ import { Request, Response } from 'express'
 import { User } from '../models/User'
 import { Wallet } from '../models/Wallet'
 import * as bcrypt from 'bcrypt'
-import { AccountInt } from '../interface/interface'
-const jwt = require('jsonwebtoken');
-
-
+import { AccountInt, WalletInt } from '../interface/interface'
+const jwt = require('jsonwebtoken')
 
 export class AccountController {
 
@@ -18,15 +16,12 @@ export class AccountController {
         try {
             const { email, password } = req.body
 
-
             let emailObject: Object = {
                 'email': email
             }
 
-
             const existingUser = await this.user.findOneByValue(emailObject)
-
-            
+        
             if (!existingUser) {
                 throw new Error('This email doest not match any user');
             }
@@ -40,33 +35,40 @@ export class AccountController {
                 throw new Error('Password incorrect');
             }
 
+            const result = await this.wallet.showWalletByUserId(existingUser.id)
+
+            const mainWallet = result.filter((elem: WalletInt) => elem.is_default === true)
 
 
-            /*
-            const accessToken = jwt.sign({id: existingUser.id}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            const accessToken: string = jwt.sign({id: existingUser.id}, process.env.ACCESS_TOKEN_SECRET || 'tokensecret' )
 
-            res.cookie('auth-token', accessToken, { 
-                maxAge: 3600 * 2, 
-                httpOnly: true, 
-                // secure: true 
-            });
-            res.header('auth-token', accessToken);
+            return res.cookie('auth-token', accessToken, {domain: 'localhost', path:'/', httpOnly: true}).json(mainWallet[0].id)
 
-            //return res.json({accessToken})
-            */
             
-
-            return res.json(true)
+            // res.cookie('auth-token', accessToken, { 
+            //     maxAge: 3600 * 2, 
+            //     httpOnly: true, 
+            //     // secure: true 
+            // });
+            // res.header('auth-token', accessToken);
 
 
         } catch (error) {
             return res.status(400).json(error.message);
 
         }
+    }
 
+    public async logOut (req: Request, res: Response) {
+
+        // res.clearCookie('auth-token', {domain: 'localhost', path:'/', httpOnly: true});
+        // res.cookie('auth-token', {}, {expires: new Date(0), domain: 'localhost', path:'/', httpOnly: true})
+
+        res.status(202).clearCookie('auth-token').send('cookie cleared')
 
 
     }
+
 
 
     public async showUsers(req: Request, res: Response): Promise<Response>  {

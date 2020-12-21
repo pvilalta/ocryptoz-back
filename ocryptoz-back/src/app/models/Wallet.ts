@@ -72,6 +72,31 @@ export class Wallet extends CoreModel {
         }
     }
 
+    public async assetPie(id: number): Promise<any[]> {
+                
+        try {          
+            
+            console.log(id)
+
+            
+            const result = await db.query(
+                `SELECT asset, 
+                round((usd_amount / SUM(usd_amount) OVER ()) * 100::NUMERIC, 0) AS "percentage"
+                FROM quantity_total
+                WHERE wallet_id = ${id}`
+            );
+
+
+
+            return result.rows;
+
+        } catch (error) {
+            throw new Error('error: ' + error.message)
+        }
+    }
+
+
+
 
 
 };

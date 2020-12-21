@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AccountController } from '../controllers/accountController'
+import verifyToken from '../middleware/verifyToken'
 const router = Router()
 const controller = new AccountController()
 
@@ -20,6 +21,9 @@ router
 
 router.route('/login')
     .post(controller.loginUser.bind(controller))
+
+router.route('/logout')
+    .get(verifyToken, controller.logOut.bind(controller))
     
 
 

@@ -49,9 +49,16 @@ export const userSchema = Joi.object().keys({
       .max('now')
       .error(new Error('Date does not fit the expected format')),
 
+    // platform_sending: Joi.when('type', {
+    //   is: 'buy' || 'sell', // switch
+    //   then: Joi.string().max(20).required().error(new Error('From has to be declared'))
+    // }),
+
     platform_sending: Joi.when('type', {
-      is: 'buy',
-      then: Joi.string().max(20).required().error(new Error('From has to be declared'))
+      switch: [
+        { is: 'buy', then: Joi.string().max(20).required().error(new Error('From has to be declared')) },
+        { is: 'sell', then: Joi.string().max(20).required().error(new Error('From has to be declared')) },
+      ]
     }),
 
     platform_receiving: Joi.string()
@@ -70,9 +77,13 @@ export const userSchema = Joi.object().keys({
       .error(new Error('Quantity does not fit the expected format')),
 
     currency_counterparty: Joi.when('type', {
-      is: 'buy',
-      then: Joi.string().max(20).required().error(new Error('Purchase currency has to be declared'))
+      switch: [
+        { is: 'buy', then: Joi.string().max(20).required().error(new Error('Purchase currency has to be declared')) },
+        { is: 'sell', then: Joi.string().max(20).required().error(new Error('Sale currency has to be declared')) },
+      ]
     }),
+
+
   
     total_amount: Joi.number()
       .min(0.000000000000001)
