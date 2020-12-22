@@ -42,15 +42,10 @@ export class AccountController {
 
             const accessToken: string = jwt.sign({id: existingUser.id}, process.env.ACCESS_TOKEN_SECRET || 'tokensecret' )
 
-            return res.cookie('auth-token', accessToken, {domain: 'localhost', path:'/', httpOnly: true}).json(mainWallet[0].id)
+            console.log('req.body', req.body)
 
-            
-            // res.cookie('auth-token', accessToken, { 
-            //     maxAge: 3600 * 2, 
-            //     httpOnly: true, 
-            //     // secure: true 
-            // });
-            // res.header('auth-token', accessToken);
+
+            return res.cookie('auth-token', accessToken, {domain: 'localhost', path:'/', httpOnly: true}).json(mainWallet[0].id)
 
 
         } catch (error) {
@@ -61,11 +56,11 @@ export class AccountController {
 
     public async logOut (req: Request, res: Response) {
 
-        // res.clearCookie('auth-token', {domain: 'localhost', path:'/', httpOnly: true});
-        // res.cookie('auth-token', {}, {expires: new Date(0), domain: 'localhost', path:'/', httpOnly: true})
-
-        res.status(202).clearCookie('auth-token').send('cookie cleared')
-
+        try {
+            res.status(202).clearCookie('auth-token').send('cookie cleared')
+        } catch (error) {
+            return res.status(400).json(error.message);
+        }
 
     }
 
@@ -124,7 +119,7 @@ export class AccountController {
             delete req.body.passwordConfirmation
 
             req.body.password = await bcrypt.hash(req.body.password, 10)
-            
+
             // type guard treatment
             if (this.isAccount(req.body)) {
                 let userInfo: AccountInt = req.body

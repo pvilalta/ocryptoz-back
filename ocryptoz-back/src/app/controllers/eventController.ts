@@ -16,9 +16,15 @@ export class EventController  {
     public async submitEventForm(req: Request, res: Response): Promise<Response>  {
 
         try {
+            console.log('res.locals.token.id', res.locals.token.id)
+            console.log('req.params.walletId', req.params.walletId)
 
-            const userId = 9
-            const walletId = parseInt(req.params.walletId, 10)            
+            const userId = res.locals.token.id
+            const walletId = parseInt(req.params.walletId, 10)         
+            
+            console.log('userId', userId)
+            console.log('req.body', req.body)
+
     
             const wallet = await this.wallet.getOneWalletByUserId(walletId, userId)   
             if (!wallet) throw new Error('This wallet does not exist')

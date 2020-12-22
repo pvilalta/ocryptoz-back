@@ -7,8 +7,8 @@ Content-Type: application/json
     "firstname": "Mila",
     "lastname": "Baro",
     "email": "msa@stgely.fr",
-    "password": "yop",
-    "passwordConfirmation": "yop"
+    "password": "@Azertyuio",
+    "passwordConfirmation": "@Azertyuio"
 }
 
 ###

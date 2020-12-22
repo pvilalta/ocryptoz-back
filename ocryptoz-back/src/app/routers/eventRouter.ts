@@ -2,12 +2,13 @@ import { Router } from 'express';
 import { EventController } from '../controllers/eventController'
 import {eventSchema} from '../validations/schema';
 const { validateBody } = require('../validations/validate');
+import verifyToken from '../middleware/verifyToken'
 const router = Router()
 const controller = new EventController()
 
 router
     .route('/event/new/:walletId')
-    .post(validateBody(eventSchema), controller.submitEventForm.bind(controller))
+    .post(validateBody(eventSchema), verifyToken, controller.submitEventForm.bind(controller))
 ;
 
 router

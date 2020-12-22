@@ -13,8 +13,8 @@ const regexEmail =
 
 // Schema for the creating user form
 export const userSchema = Joi.object().keys({
-    firstname: Joi.string().required().error(new Error('First name is required')),
-    lastname: Joi.string().required().error(new Error('Last name is required')),
+    // firstname: Joi.string().required().error(new Error('First name is required')),
+    // lastname: Joi.string().required().error(new Error('Last name is required')),
     email: Joi.string()
       .pattern(new RegExp(regexEmail))
       .required()
@@ -30,7 +30,8 @@ export const userSchema = Joi.object().keys({
       .error(new Error('Password confirmation is required')),
   
     country: Joi.string().required().error(new Error('Country is required')),
-  });
+  }).unknown(true);
+  
 
   /**
    * EVENT
