@@ -407,3 +407,21 @@ async function nameToSlug(value: string) {
   
 }
 
+// async function slugToName(value: string) {
+
+//   try {
+    
+//     const result = await db.query(
+//       `SELECT * FROM "currency" WHERE slug = '${value}'`
+//     );
+
+//     return result.rows[0].name;
+
+//   } catch (error) {
+//     throw new Error('We apologize, we cannot handle your request')
+
+//   }
+
+  
+// }
+

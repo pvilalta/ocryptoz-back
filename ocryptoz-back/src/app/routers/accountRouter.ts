@@ -11,7 +11,7 @@ const { validateBody } = require('../validations/validate');
 router
     .route('/account')
     .get(controller.showUsers.bind(controller))
-    .post(validateBody(userSchema), controller.addUser.bind(controller))
+    .post(validateBody(userSchema), verifyToken, controller.addUser.bind(controller))
 
 router
     .route('/account/:id')
