@@ -4,11 +4,23 @@ import db from "../config/db"
 
 export async function bodyControl(body: any, priceType?: string | undefined) {
 
-    if(!body.id && body.total_amount && body.unit_price) {
+    if(!body.id && body.total_amount && body.unit_price || !body.id && !body.total_amount && !body.unit_price) {
         throw new Error(
-            'You have to choose either total amount or unit price to declare your event but not both at the same time'
+            'You have to choose either total amount or unit price to declare your event'
         );
-    }    
+    }
+    
+    if (body.currency_asset) { 
+      body.currency_asset = await nameToSlug(body.currency_asset)
+    }
+
+    if (body.currency_counterparty) { 
+      body.currency_counterparty = await nameToSlug(body.currency_counterparty)
+    }
+
+    if (body.currency_fees) { 
+      body.currency_fees = await nameToSlug(body.currency_fees)
+    }
     
     // B&S + TOTAL AMOUNT
     if((body.type === 'buy' && body.total_amount && (priceType === undefined || priceType === 'totalAmount')) || (body.type === 'sell' && body.total_amount && (priceType === undefined || priceType === 'totalAmount'))) {
@@ -30,7 +42,7 @@ export async function bodyControl(body: any, priceType?: string | undefined) {
         if (!body.note) {body.note = '-'}
 
         // define ref_usd_fees
-        if (!body.fees) {
+        if (!body.fees || body.fees === 0) {
           body.currency_fees = '-'
           body.fees = 0;
           body.ref_usd_fees = 0;
@@ -49,8 +61,6 @@ export async function bodyControl(body: any, priceType?: string | undefined) {
 
     // B&S + UNIT PRICE
     if((body.type === 'buy' && body.unit_price && (priceType === undefined || priceType === 'unitPrice')) || (body.type === 'sell' && body.unit_price && (priceType === undefined || priceType === 'unitPrice'))) {
-
-        console.log('here');
         
 
         // check if informations are conform
@@ -170,7 +180,7 @@ async function bodyData(body: any) {
 
     // get fees in dollar
     let feesInDollar;
-    if (!!feeCurrency && feeCurrency > 0) {
+    if (!!feeCurrency) {
         feesInDollar = await fetchConversion(
             feeCurrency,
             convDate.fiatDate,
@@ -264,8 +274,8 @@ async function fetchConversion(devise: string, fiatDate: string, cryptoDate: str
   
         if (!formatedData.rates) {
           throw new Error(
-            'We apologize, we are not able to respond to your request'
-          );
+            'We apologize, we cannot handle your request'
+            );
         }  
             
         // returning value
@@ -282,8 +292,8 @@ async function fetchConversion(devise: string, fiatDate: string, cryptoDate: str
   
         if (!formatedData.market_data) {
           throw new Error(
-            'We apologize, we are not able to respond to your request'
-          );
+            'We apologize, we cannot handle your request'
+            );
         }
   
         // returning value
@@ -307,10 +317,6 @@ async function checkFund(body: any) {
         for (let elem of result.rows) {
           // pushing every exchange in a array
           currentExchange.push(elem.exchange);
-
-
-            console.log('elem', elem);
-            console.log('body', body);
             
             
           // if an exchange and currency match
@@ -370,7 +376,7 @@ async function isNeeded(currency: string) {
     // error treatment if is_needed doest not work
     if (result.rowCount === 0) {
       throw new Error(
-        'We apologize, we are not able to respond to your inquirie'
+        'We apologize, we cannot handle your request'
       );
     }
 }
@@ -382,4 +388,40 @@ async function isBodyConform(body: any, fields: any) {
     // checking if user get enough fund -> throw an error if problems
     if (body.type === 'sell' || body.type === 'transfer') {await checkFund(body)}
 }
+
+async function nameToSlug(value: string) {
+
+  try {
+    
+    const result = await db.query(
+      `SELECT * FROM "currency" WHERE name = '${value}'`
+    );
+
+    return result.rows[0].slug;
+
+  } catch (error) {
+    throw new Error('We apologize, we cannot handle your request')
+
+  }
+
+  
+}
+
+// async function slugToName(value: string) {
+
+//   try {
+    
+//     const result = await db.query(
+//       `SELECT * FROM "currency" WHERE slug = '${value}'`
+//     );
+
+//     return result.rows[0].name;
+
+//   } catch (error) {
+//     throw new Error('We apologize, we cannot handle your request')
+
+//   }
+
+  
+// }
 

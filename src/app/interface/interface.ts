@@ -20,6 +20,7 @@ export interface AccountInt {
 export interface WalletInt {
     [key: string]: number | string | boolean | undefined;
 
+    id?: number,
     name: string,
     is_default: boolean,
     user_id: number

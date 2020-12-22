@@ -16,9 +16,15 @@ export class EventController  {
     public async submitEventForm(req: Request, res: Response): Promise<Response>  {
 
         try {
+            console.log('res.locals.token.id', res.locals.token.id)
+            console.log('req.params.walletId', req.params.walletId)
 
-            const userId = 16
-            const walletId = parseInt(req.params.walletId, 10)            
+            const userId = res.locals.token.id
+            const walletId = parseInt(req.params.walletId, 10)         
+            
+            console.log('userId', userId)
+            console.log('req.body', req.body)
+
     
             const wallet = await this.wallet.getOneWalletByUserId(walletId, userId)   
             if (!wallet) throw new Error('This wallet does not exist')
@@ -27,20 +33,26 @@ export class EventController  {
             req.body.wallet_id = walletId
             req.body.date = new Date(req.body.date)
 
+            console.log('before treatment req.body', req.body)
+
+
             // body treatment
             req.body = await bodyControl(req.body)
+
+            console.log('after treatment req.body', req.body)
+
                         
             // type guard treatment
             if (this.isEvent(req.body)) {
                 const result = await this.event.insert(req.body)
-                return res.json(result)
+                return res.status(201).json('Your event has ben added');
 
             } else {
                 throw new Error('Invalid Event format')
             }
             
         } catch (error) {
-            return res.json('error: ' + error.message)
+            return res.status(400).json(error.message);
 
         }
 
@@ -82,7 +94,7 @@ export class EventController  {
 
             
         } catch (error) {
-            return res.json('error: ' + error.message)
+            return res.status(400).json(error.message);
 
         }
     }

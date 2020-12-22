@@ -4,12 +4,11 @@ POST http://localhost:1234/account
 Content-Type: application/json
 
 {
-    "firstname": "Enrico",
-    "lastname": "Macias",
-    "email": "enricom@espana.fr",
-    "password": "yop",
-    "passwordConfirmation": "yop",
-    "country": "espagne"
+    "firstname": "Mila",
+    "lastname": "Baro",
+    "email": "msa@stgely.fr",
+    "password": "@Azertyuio",
+    "passwordConfirmation": "@Azertyuio"
 }
 
 ###
@@ -26,13 +25,30 @@ DELETE http://localhost:1234/account/13
 Content-Type: application/json
 
 ###
+
+// LOGIN
+POST http://localhost:1234/login
+Content-Type: application/json
+
+{
+    "email": "jeanb@crypto.io",
+    "password": "@Cryptomaniac1"
+}
+
+###
 // WALLET REQUESTS
 
+
+###
+GET http://localhost:1234/wallet/13
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiaWF0IjoxNjA3NTkwODUwfQ.bw0lhjXptPVzWwlULDy0-cZMLvdrWUESFaWlxPSMx2I
+
+###
 POST http://localhost:1234/wallet
 Content-Type: application/json
 
 {
-    "name": "long term investment"
+    "name": "short term investment"
 }
 
 ###

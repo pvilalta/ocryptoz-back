@@ -35,7 +35,7 @@ export abstract class CoreModel {
         }
     }
 
-    public async findOneByValue(value: Object): Promise<any[]> {
+    public async findOneByValue(value: Object): Promise<any> {
         try {
 
             const result = await db.query(
@@ -44,6 +44,7 @@ export abstract class CoreModel {
                 ).toString()} = $1`,
                 Object.values(value)
             );
+            
 
             return result.rows[0]
         } catch (error) {

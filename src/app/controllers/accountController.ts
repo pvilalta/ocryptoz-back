@@ -1,12 +1,69 @@
 import { Request, Response } from 'express'
 import { User } from '../models/User'
+import { Wallet } from '../models/Wallet'
 import * as bcrypt from 'bcrypt'
-import { AccountInt } from '../interface/interface'
-
+import { AccountInt, WalletInt } from '../interface/interface'
+const jwt = require('jsonwebtoken')
 
 export class AccountController {
 
     private user: User = new User();
+    private wallet: Wallet = new Wallet();
+
+
+
+    public async loginUser (req: Request, res: Response): Promise<Response> {
+        try {
+            const { email, password } = req.body
+
+            let emailObject: Object = {
+                'email': email
+            }
+
+            const existingUser = await this.user.findOneByValue(emailObject)
+        
+            if (!existingUser) {
+                throw new Error('This email doest not match any user');
+            }
+
+            const isPasswordValid = bcrypt.compareSync(
+                password,
+                existingUser.password
+            );
+
+            if (!isPasswordValid) {
+                throw new Error('Password incorrect');
+            }
+
+            const result = await this.wallet.showWalletByUserId(existingUser.id)
+
+            const mainWallet = result.filter((elem: WalletInt) => elem.is_default === true)
+
+
+            const accessToken: string = jwt.sign({id: existingUser.id}, process.env.ACCESS_TOKEN_SECRET || 'tokensecret' )
+
+            console.log('req.body', req.body)
+
+
+            return res.cookie('auth-token', accessToken, {domain: 'localhost', path:'/', httpOnly: true}).json(mainWallet[0].id)
+
+
+        } catch (error) {
+            return res.status(400).json(error.message);
+
+        }
+    }
+
+    public async logOut (req: Request, res: Response) {
+
+        try {
+            res.status(202).clearCookie('auth-token').send('cookie cleared')
+        } catch (error) {
+            return res.status(400).json(error.message);
+        }
+
+    }
+
 
 
     public async showUsers(req: Request, res: Response): Promise<Response>  {
@@ -62,7 +119,7 @@ export class AccountController {
             delete req.body.passwordConfirmation
 
             req.body.password = await bcrypt.hash(req.body.password, 10)
-            
+
             // type guard treatment
             if (this.isAccount(req.body)) {
                 let userInfo: AccountInt = req.body
@@ -73,7 +130,7 @@ export class AccountController {
             }
 
         } catch (error) {
-            return res.json('error: ' + error.message)
+            return res.status(400).json(error.message);
 
         }
 
